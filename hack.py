@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-LEVEL = 4
+LEVEL = 0
 
 length = 4
 chars = ""
@@ -21,7 +21,8 @@ if LEVEL == 4:
 def generate_strings(input_string=""):
     if len(input_string) < length:
         for char in chars:
-            yield input_string + char
+            if len(input_string + char) == length:
+                yield input_string + char
             yield from generate_strings(input_string + char)
 
 

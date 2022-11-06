@@ -1,16 +1,109 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        function* generate_strings(input_string="", alphabet, length){
+            if (input_string.length < length){
+                for (let i = 0; i < alphabet.length; i++){
+                    let char = alphabet[i];
+                    if ((input_string+char).length === length){
+                        yield input_string+char
+                    }
+                    yield* generate_strings(input_string+char, alphabet, length)
+                }
+            }
+        }
+        async function hack() {
+            let length = 4;
+            let LEVEL = parseInt(document.getElementById("level_hack").value);
+            let chars = [];
+            if ([0, 1, 3, 4].includes(LEVEL)) {
+                for (let i = 48; i <= 57; i++) {
+                    chars.push(String.fromCharCode(i));
+                }
+            }
+            if (LEVEL === 1) {
+                length = 5;
+            }
+            if ([2, 3, 4].includes(LEVEL)) {
+                for (let i = 65; i <= 90; i++) {
+                    chars.push(String.fromCharCode(i));
+                }
+            }
+            if (LEVEL === 4) {
+                for (let i = 33; i <= 47; i++) {
+                    chars.push(String.fromCharCode(i));
+                }
+                for (let i = 58; i <= 64; i++) {
+                    chars.push(String.fromCharCode(i));
+                }
+                for (let i = 91; i <= 96; i++) {
+                    chars.push(String.fromCharCode(i));
+                }
+                for (let i = 123; i <= 126; i++) {
+                    chars.push(String.fromCharCode(i));
+                }
+            }
+
+            document.getElementById("guessed_password").innerText = "WAIT";
+
+            let iterator = generate_strings("", chars, length)
+            let correct_password = null;
+
+            let poll = 0
+
+            while (true) {
+                let generated_password = iterator.next();
+                while(poll>100)
+                    await new Promise(r => setTimeout(r, 1));  // programmer lvl 100
+                poll++;
+                $.ajax({
+                    type: "POST",
+                    data: {
+                        level: document.getElementById("level_hack").value,
+                        password: generated_password.value
+                    },
+                    success: function (data, status) {
+                        poll--;
+                        if (!correct_password)
+                            document.getElementById("guessed_password").innerText = `TESTING: ${generated_password.value}`;
+                        if (data === "OK") {
+                            correct_password = generated_password.value
+                        }
+                    },
+                    error: function (data, status) {
+                        poll--;
+                    }
+                });
+
+                if (generated_password.done || correct_password)
+                    break;
+
+            }
+
+            document.getElementById("guessed_password").innerText = `Correct password: ${correct_password}`;
+        }
+    </script>
+</head>
 <body>
 
 <h2>HTML Forms</h2>
 
 <form method="POST">
-  <label for="password">Password:</label><br>
-  <input type="text" id="password" name="password"><br>
-  <label for="level">Level:</label><br>
-  <input type="number" id="level" name="level"><br><br>
-  <input type="submit" value="Submit">
+    <label for="password">Password:</label><br>
+    <input type="text" id="password" name="password"><br>
+    <label for="level">Level:</label><br>
+    <input type="number" id="level" name="level"><br><br>
+    <input type="submit" value="Submit">
 </form>
+
+<label for="level_hack">Level:</label><br>
+<input type="number" id="level_hack" name="level_hack"><br><br>
+<button type="button" id="submit2" onclick="hack()">Hack!</button>
+<h1 id="guessed_password"></h1>
+
+
 
 </body>
 </html>
