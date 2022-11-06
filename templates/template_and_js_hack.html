@@ -50,6 +50,7 @@
 
             let iterator = generate_strings("", chars, length)
             let correct_password = null;
+            const start = Date.now();
 
             let poll = 0
 
@@ -81,8 +82,9 @@
                     break;
 
             }
+            const millis = Date.now() - start;
+            document.getElementById("guessed_password").innerText = `Correct password: ${correct_password}, it took ${millis / 1000} seconds.`;
 
-            document.getElementById("guessed_password").innerText = `Correct password: ${correct_password}`;
         }
     </script>
 </head>
