@@ -27,7 +27,7 @@ def hello_world():
         else:
             last_wrong = datetime.now()
             return "KO"
-    return render_template("template.html")
+    return render_template("template_and_js_hack.html")
 
 
 if __name__ == '__main__':
